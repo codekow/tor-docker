@@ -1,21 +1,28 @@
-# Build the obfs4 binary (cross-compiling)
-FROM --platform=$BUILDPLATFORM golang:1.20-alpine as obfs-builder
-ARG OBFS_VERSION="obfs4proxy-0.0.14-tor2"
+# Build the lyrebird4 binary (cross-compiling)
+ARG GO_VERSION=1.22
+
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine as lyrebird-builder
+ARG LYREBIRD_VERSION="0.6.2"
 
 RUN apk add --update --no-cache git && \
-      git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird.git --depth 1 --branch "${OBFS_VERSION}" /obfs
+      git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird.git --depth 1 --branch "lyrebird-${LYREBIRD_VERSION}" /lyrebird
 
-# Build obfs
+# Build lyrebird
+WORKDIR /lyrebird
 RUN mkdir /out
-WORKDIR /obfs
+
 ARG TARGETOS TARGETARCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
-    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/obfs4proxy ./obfs4proxy && \
-      echo 'user:x:1001:1001:user:/:' > /tmp/passwd
+    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+      go build -ldflags="-X main.lyrebirdVersion=${LYREBIRD_VERSION}" -o /out/lyrebird ./cmd/lyrebird
 
+RUN echo 'user:x:1001:1001:user:/:' > /tmp/passwd && \
+    chmod g+w /tmp/passwd
+
+# Build standalone container
 FROM scratch
+COPY --from=lyrebird-builder /tmp/passwd /etc/passwd
+COPY --from=lyrebird-builder /out/lyrebird /obfs4proxy
 USER 1001
-COPY --from=obfs-builder /tmp/passwd /etc/passwd
-COPY --from=obfs-builder /out/obfs4proxy /
 ENTRYPOINT ["/obfs4proxy"]

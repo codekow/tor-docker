@@ -1,9 +1,9 @@
-ARG ALPINE_VERSION="3.18.4"
+ARG ALPINE_VERSION="3"
 
 # Tor builder
 FROM --platform=$TARGETPLATFORM docker.io/library/alpine:${ALPINE_VERSION} as tor-builder
 
-ARG TOR_VERSION="0.4.8.9"
+ARG TOR_VERSION="0.4.8.19"
 RUN apk add --update --no-cache \
     git build-base automake autoconf make \
     build-base openssl-dev libevent-dev zlib-dev \
@@ -15,7 +15,7 @@ RUN git clone https://gitlab.torproject.org/tpo/core/tor.git --depth 1 --branch 
       ./autogen.sh
 
 # Notes:
-# - --enable-gpl is required to compile PoW anti-DoS: https://community.torproject.org/onion-services/advanced/dos/
+# --enable-gpl is required to compile PoW anti-DoS: https://community.torproject.org/onion-services/advanced/dos/
 # --enable-static-tor
 RUN ./configure \
     --disable-asciidoc \
@@ -25,27 +25,27 @@ RUN ./configure \
       make && \
       make install
 
-# Build the obfs4 binary (cross-compiling)
-FROM --platform=$BUILDPLATFORM golang:1.20-alpine as obfs-builder
-ARG OBFS_VERSION="obfs4proxy-0.0.14-tor2"
+# Build the lyrebird binary (cross-compiling)
+ARG GO_VERSION=1.22
 
-WORKDIR /obfs
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine as lyrebird-builder
+ARG LYREBIRD_VERSION="0.6.2"
+
 RUN apk add --update --no-cache git && \
-      git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird.git --depth 1 --branch "${OBFS_VERSION}" /obfs
+      git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird.git --depth 1 --branch "lyrebird-${LYREBIRD_VERSION}" /lyrebird
 
-# Build obfs
+# Build lyrebird
+WORKDIR /lyrebird
 RUN mkdir /out
 
 ARG TARGETOS TARGETARCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
-    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o /out/obfs4proxy ./obfs4proxy
+    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+      go build -ldflags="-X main.lyrebirdVersion=${LYREBIRD_VERSION}" -o /out/lyrebird ./cmd/lyrebird
 
 # Tor runner
 FROM --platform=$TARGETPLATFORM docker.io/library/alpine:${ALPINE_VERSION} as runner
-
-LABEL \
-      org.opencontainers.image.source "https://github.com/bugfest/tor-docker"
 
 WORKDIR /app
 ENV HOME=/app
@@ -53,8 +53,7 @@ ENV HOME=/app
 RUN apk add --update --no-cache \
       libevent \
       xz-libs \
-      zstd-libs && \
-    chmod -R g+w /app /run
+      zstd-libs
 
 # install tor
 RUN mkdir -p /usr/local/bin /usr/local/etc/tor /usr/local/share/tor
@@ -68,13 +67,16 @@ COPY --from=tor-builder /tor/src/config/geoip /usr/local/share/tor/.
 COPY --from=tor-builder /tor/src/config/geoip6 /usr/local/share/tor/.
 
 # install transports
-COPY --from=obfs-builder /out/obfs4proxy /usr/local/bin/.
+COPY --from=lyrebird-builder /out/lyrebird /usr/local/bin/.
 
-# create service dir (we don't define VOLUME because https://github.com/docker-library/mysql/issues/255
-# and other issues when running as non-root user)
-RUN mkdir -p /run/tor/service && chown -R 1001 /run/tor
+RUN mkdir -p /run/tor/service && \
+    chgrp -R 0 /app /run/tor /var/lib /var/log && \
+    chown -R 1001:0 /run/tor && \
+    chmod -R g+w /app /run /var/lib /var/log
 
 # change to non root
 USER 1001
+
+LABEL org.opencontainers.image.source "https://github.com/codekow/tor-docker"
 
 ENTRYPOINT ["/usr/local/bin/tor"]

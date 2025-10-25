@@ -6,8 +6,8 @@ all: build
 quick:
 	docker buildx build \
 		--platform=linux/amd64,linux/arm,linux/arm64 \
-		--build-arg TOR_VERSION=0.4.8.9 \
-		--tag quay.io/bugfest/tor:0.4.8.9 \
+		--build-arg TOR_VERSION=0.4.8.19 \
+		--tag quay.io/bugfest/tor:0.4.8.19 \
 		--tag quay.io/bugfest/tor:latest \
 		--squash \
 		-f Dockerfile.quick \
@@ -18,9 +18,22 @@ quick:
 build:
 	docker buildx build \
 		--platform=linux/amd64,linux/arm,linux/arm64 \
-		--build-arg TOR_VERSION=0.4.8.9 \
-		--tag quay.io/bugfest/tor:0.4.8.9 \
+		--build-arg TOR_VERSION=0.4.8.19 \
+		--tag quay.io/bugfest/tor:0.4.8.19 \
 		--tag quay.io/bugfest/tor:latest \
 		--squash \
 		-f Dockerfile \
+		.
+
+# Dockerfile.obfs4 builds lyrebird
+.PHONY: obfs4
+obfs4:
+	docker buildx build \
+		--platform=linux/amd64,linux/arm,linux/arm64 \
+		--build-arg LYREBIRD_VERSION=0.6.2 \
+		--build-arg GO_VERSION=1.22 \
+		--tag quay.io/bugfest/obfs4:0.6.2 \
+		--tag quay.io/bugfest/obfs4:latest \
+		--squash \
+		-f Dockerfile.obfs4 \
 		.
