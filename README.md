@@ -1,7 +1,7 @@
 # tor-docker
 
-[![Build multiarch image - latest](https://github.com/bugfest/tor-docker/actions/workflows/main.yml/badge.svg)](https://github.com/bugfest/tor-docker/actions/workflows/main.yml)
-[![Build multiarch image - tag](https://github.com/bugfest/tor-docker/actions/workflows/main-tag.yml/badge.svg)](https://github.com/bugfest/tor-docker/actions/workflows/main-tag.yml)
+[![Build multiarch image - latest](https://github.com/codekow/tor-docker/actions/workflows/main.yml/badge.svg)](https://github.com/codekow/tor-docker/actions/workflows/main.yml)
+[![Build multiarch image - tag](https://github.com/codekow/tor-docker/actions/workflows/main-tag.yml/badge.svg)](https://github.com/codekow/tor-docker/actions/workflows/main-tag.yml)
 
 `Tor` daemon multiarch container.
 
@@ -26,7 +26,7 @@ Downloads:
 
 Used by:
 
-- [bugfest/tor-controller](https://github.com/bugfest/tor-controller)
+- [codekow/tor-controller](https://github.com/codekow/tor-controller)
 
 ## Tor
 
@@ -60,5 +60,5 @@ make quick
 ## Usage
 
 ```shell
-docker pull quay.io/bugfest/tor
+docker pull ghcr.io/codekow/tor
 ```
