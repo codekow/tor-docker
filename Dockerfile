@@ -1,4 +1,5 @@
-ARG ALPINE_VERSION="3"
+ARG ALPINE_VERSION=3
+ARG GO_VERSION=1.22
 
 # Tor builder
 FROM --platform=$TARGETPLATFORM docker.io/library/alpine:${ALPINE_VERSION} as tor-builder
@@ -26,7 +27,6 @@ RUN ./configure \
       make install
 
 # Build the lyrebird binary (cross-compiling)
-ARG GO_VERSION=1.22
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine as lyrebird-builder
 ARG LYREBIRD_VERSION="0.6.2"

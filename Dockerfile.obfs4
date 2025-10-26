@@ -23,6 +23,6 @@ RUN echo 'user:x:1001:1001:user:/:' > /tmp/passwd && \
 # Build standalone container
 FROM scratch
 COPY --from=lyrebird-builder /tmp/passwd /etc/passwd
-COPY --from=lyrebird-builder /out/lyrebird /obfs4proxy
+COPY --from=lyrebird-builder /out/lyrebird /lyrebird
 USER 1001
-ENTRYPOINT ["/obfs4proxy"]
+ENTRYPOINT ["/lyrebird"]

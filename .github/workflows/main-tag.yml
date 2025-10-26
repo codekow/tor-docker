@@ -29,7 +29,7 @@ jobs:
           BUILD_DATE=$(date --rfc-3339=seconds --utc)
           echo "build_date=${BUILD_DATE}" >> ${GITHUB_OUTPUT}
           PLATFORMS=amd64,arm,arm64
-          TAGS1="quay.io/${{ github.repository_owner }}/tor:${{ steps.vars.outputs.tag }}"
+          TAGS1="ghcr.io/${{ github.repository_owner }}/tor:${{ steps.vars.outputs.tag }}"
           if [ "${{github.event_name}}" == "pull_request" ]; then
                 echo "push=false" >> ${GITHUB_OUTPUT}
               else
@@ -43,14 +43,6 @@ jobs:
         uses: docker/setup-qemu-action@v1
         with:
           platforms: ${{ steps.prep.outputs.platforms }}
-
-      - name: Login to Quay.io
-        uses: docker/login-action@v1
-        if: github.event_name != 'pull_request'
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_TOKEN }}
 
       - name: Set up Docker Buildx
         id: buildx
