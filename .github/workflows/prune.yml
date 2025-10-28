@@ -16,6 +16,7 @@ jobs:
         with:
           account: codekow
           token: ${{ secrets.GITHUB_TOKEN }}
+          cut-off: 1w
           image-names: "tor"
           tag-selection: untagged
           keep-n-most-recent: 3
