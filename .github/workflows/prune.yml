@@ -16,8 +16,8 @@ jobs:
         with:
           account: user
           token: ${{ secrets.GITHUB_TOKEN }}
-          cut-off: 1w
+          cut-off: 1h
           image-names: "tor"
-          tag-selection: untagged
+          tag-selection: both
           keep-n-most-recent: 3
           # dry-run: "true"
