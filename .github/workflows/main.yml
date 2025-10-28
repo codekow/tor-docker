@@ -3,8 +3,14 @@ name: Build multiarch image - latest
 on:
   push:
     branches: [ main ]
+    paths:
+      - "Dockerfile*"
+      - "!.github/**"
   pull_request:
     branches: [ main ]
+    paths:
+      - "Dockerfile*"
+      - "!.github/**"
     
   workflow_dispatch:
   
