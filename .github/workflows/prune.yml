@@ -12,12 +12,12 @@ jobs:
     name: Prune Packages
     runs-on: ubuntu-latest
     steps:
-      - uses: snok/container-retention-policy@v3.0.0
+      - uses: snok/container-retention-policy@v3.0.1
         with:
           account: user
           token: ${{ secrets.GITHUB_TOKEN }}
-          cut-off: 1h
+          cut-off: 5h
           image-names: "tor"
           tag-selection: both
-          keep-n-most-recent: 3
+          keep-n-most-recent: 5
           # dry-run: "true"
