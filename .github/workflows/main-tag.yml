@@ -22,7 +22,7 @@ jobs:
 
       - name: Get latest tag
         id: vars
-        run: echo "tag=${GITHUB_REF:10}" >> ${GITHUB_OUTPUT}
+        run: echo "tag=${GITHUB_REF#refs/heads/}" >> ${GITHUB_OUTPUT}
 
       - name: Checkout
         uses: actions/checkout@v5
