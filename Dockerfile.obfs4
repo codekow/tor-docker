@@ -1,7 +1,7 @@
 # Build the lyrebird4 binary (cross-compiling)
 ARG GO_VERSION=1.22
 
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine as lyrebird-builder
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS lyrebird-builder
 ARG LYREBIRD_VERSION="0.6.2"
 
 RUN apk add --update --no-cache git && \

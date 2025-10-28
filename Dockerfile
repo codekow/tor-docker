@@ -2,7 +2,7 @@ ARG ALPINE_VERSION=3
 ARG GO_VERSION=1.22
 
 # Tor builder
-FROM --platform=$TARGETPLATFORM docker.io/library/alpine:${ALPINE_VERSION} as tor-builder
+FROM --platform=$TARGETPLATFORM docker.io/library/alpine:${ALPINE_VERSION} AS tor-builder
 
 ARG TOR_VERSION="0.4.8.19"
 RUN apk add --update --no-cache \
@@ -28,7 +28,7 @@ RUN ./configure \
 
 # Build the lyrebird binary (cross-compiling)
 
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine as lyrebird-builder
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS lyrebird-builder
 ARG LYREBIRD_VERSION="0.6.2"
 
 RUN apk add --update --no-cache git && \
@@ -45,7 +45,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
       go build -ldflags="-X main.lyrebirdVersion=${LYREBIRD_VERSION}" -o /out/lyrebird ./cmd/lyrebird
 
 # Tor runner
-FROM --platform=$TARGETPLATFORM docker.io/library/alpine:${ALPINE_VERSION} as runner
+FROM --platform=$TARGETPLATFORM docker.io/library/alpine:${ALPINE_VERSION} AS runner
 
 WORKDIR /app
 ENV HOME=/app
@@ -77,6 +77,6 @@ RUN mkdir -p /run/tor/service && \
 # change to non root
 USER 1001
 
-LABEL org.opencontainers.image.source "https://github.com/codekow/tor-docker"
+LABEL org.opencontainers.image.source="https://github.com/codekow/tor-docker"
 
 ENTRYPOINT ["/usr/local/bin/tor"]
