@@ -20,4 +20,4 @@ jobs:
           image-names: "tor"
           tag-selection: untagged
           keep-n-most-recent: 3
-          dry-run: "true"
+          # dry-run: "true"
