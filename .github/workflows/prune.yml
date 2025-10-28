@@ -12,10 +12,11 @@ jobs:
     name: Prune Packages
     runs-on: ubuntu-latest
     steps:
-      - uses: snok/container-retention-policy@v3.0.1
+      - uses: snok/container-retention-policy@v3.0.0
         with:
-          account: redhat-na-ssa
+          account: codekow
           token: ${{ secrets.GITHUB_TOKEN }}
-          image-names: "tor"  # all packages owned by the account
-          tag-selection: both
-          cut-off: 4w
+          image-names: "tor"
+          tag-selection: untagged
+          keep-n-most-recent: 3
+          dry-run: "true"
