@@ -1,0 +1,21 @@
+name: Prune Packages
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"  # every day at midnight, utc
+
+jobs:
+  delete-package-versions:
+    permissions:
+      contents: read
+      packages: write
+    name: Prune Packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: snok/container-retention-policy@v3.0.1
+        with:
+          account: redhat-na-ssa
+          token: ${{ secrets.GITHUB_TOKEN }}
+          image-names: "tor"  # all packages owned by the account
+          tag-selection: both
+          cut-off: 4w
